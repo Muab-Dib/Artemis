@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# Line above tells us where the python environment is located
 """
 Author: Luna Stephenson
 Credits: Credits to Paradoxical's YouTube series on how to program a Discord bot in Python for inspiration. 
@@ -5,8 +7,6 @@ This project is not meant for commercial use. I made this so I can brush up on P
 Overtime, I will make my own adjustments to it and implement my own unique features for it. But as of this initial posting, this is
 for learning purposes. 
 """
-#!/usr/bin/env python
-# Line above tells us where the python environment is located
 import discord # import the discord.py library
 from discord.ext import commands, tasks # Import commands from discord.ext
 import os # import os
