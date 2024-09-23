@@ -4,50 +4,51 @@ import random as rand
 import re
 #import asyncpraw
 
+# dice roller class for cogs
 class DiceRoller(commands.Cog):
 	def __init__(self, bot):
-		self.bot = bot
-
+		self.bot = bot # bot is instantiated
+		self.res = 0 # global variable for bot
+	# Listener event
 	@commands.Cog.listener()
 	async def on_ready(self):
 		print(f"{__name__} is online!")
-
-	async def roll_die(self, quant, dieType):
-		res = 0
-		for i in quant:
-			res += rand.randint(1, dieType)
-		print(f'{self.res}')
-		return int(self.res)
+	# This rolls the dice
+	def roll_die(self, quant, dieType):
+		roll_result = 0
+		dieType = int(dieType)
+		quant = int(quant)
+		for i in range(int(quant)):
+			roll_result += rand.randrange(1, dieType+1)
+		return roll_result
 	
 	# format: .roll [quant][prefix][dieType][arith]*{modifiers}* (optional)
 	# {modifiers} = roll (recursion), repeating infinitely or 0 times
 	# Example: .roll 1d20+5. quant=1, prefix=d, dieType=20,airth=+,modifiers=5
 	@commands.command()
-	async def roll(self, ctx, quant: int, prefix, dieType: int): #, *arith=None, *modifiers=0):
+	async def roll(self, ctx, arg):
 		print(f"Received!")
-
-		str_com = str(quant) + prefix + str(dieType)
 		reg_die = re.compile("(\d*(d{1}\d+)+)")
-		if not reg_die.match(str_com):
-			await ctx.send(f'Command format is wrong! Your format was {str_com}')
-		"""
-		if prefix.lower() != "d":
-			await ctx.send(f'Command is invalid as you entered {prefix}')
-		if type(quant) is not int and type(dieType) is not int:
-			await ctx.send(f'Command has invalid types')
-		"""
-		"""
-		if arith is None:
-			arith = {}
-			modifiers = {}
-		if modifiers is None:
-			modifiers = {}
-		"""
-		# TODO: Figure out how to get the arguments implemented properly.
-		res = self.roll_die(quant, dieType)
-		print(res)
+		multiple_die_rolls = re.findall(reg_die, arg) # I plan on using this in the future to
+		# find dice within dice (aka, if someone did 1d20 + 1d20, it'll see the second d20 and run this command again)
+		# though idk if I can do recursion on a commands.command() like that so easily.
+		print(multiple_die_rolls) # prints them in the console
+		if not reg_die.match(arg): # if the command input doesn't match with the regex, we tell them its wrong.
+			await ctx.send(f'Command format is wrong! Your format was {arg}')
+			return
+		# TODO: Rolling works now, but I can't have it do recursion yet, nor can it do arithmetic
+		# I did get it to do arithmetic earlier, but I rolled without modifiers, the bot won't send the result.
+		# So I'm gonna work on that later.
+		print(f"Arg is: {arg}") # check the command format
+		cmd_split = re.split(r"(\D+)",arg) # split it by number. NOTE: THIS IS PROBABLY TEMPORARY!
+		print(f"Split command is: {cmd_split}")
+		quant = cmd_split[0] # these are hard coded values for where we expect to find the quantity and dieType
+		dieType = cmd_split[2]
+		self.res = self.roll_die(quant, dieType) # we store the roll die's result in the bot's res variable
+		print(self.res) # print for debugging
+		# send the message via an embed
 		output_cmd = discord.Embed(title="Roll", description="Your die result!", color=discord.Color.pink())
-		output_cmd.add_field(name=f"{ctx.author.name}'s result is ",value=f"{res}",inline=False)
+		output_cmd.add_field(name=f"{ctx.author.name}'s result is ",value=f"{self.res}",inline=False)
 		await ctx.send(embed=output_cmd)
 
 async def setup(bot):
